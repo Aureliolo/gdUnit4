@@ -94,6 +94,7 @@ func _on_type_Dictionary(dict: Dictionary) -> String:
 	return str(dict)
 
 
+# gdlint: disable=max-returns
 func _on_type_Array(value: Variant, type: int) -> String:
 	match type:
 		TYPE_ARRAY:
@@ -191,6 +192,7 @@ func _on_type_Vector(value: Variant, type: int) -> String:
 				return "Vector4i()"
 			return "Vector4i%s" % value
 	return "unknown vector type %d" % type
+# gdlint: enable=max-returns
 
 
 func _on_type_Transform2D(transform: Transform2D) -> String:
@@ -210,7 +212,7 @@ func _on_type_Projection(projection: Projection) -> String:
 
 
 @warning_ignore("unused_parameter")
-func _on_type_RID(value: RID) -> String:
+func _on_type_RID(_value: RID) -> String:
 	return "RID()"
 
 

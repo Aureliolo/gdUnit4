@@ -69,8 +69,9 @@ func check_running_in_test_env() -> bool:
 
 func _add_context_menus() -> void:
 	_filesystem_context_menu = preload("res://addons/gdUnit4/src/ui/menu/GdUnitEditorFileSystemContextMenuHandler.gd").new()
-	_editor_context_menu = preload("res://addons/gdUnit4/src/ui/menu/GdUnitScriptEditorContextMenuHandler.gd").new()
-	_editor_code_context_menu = preload("res://addons/gdUnit4/src/ui/menu/GdUnitScriptEditorContextMenuHandler.gd").new()
+	const ScriptEditorContextMenuHandler := preload("res://addons/gdUnit4/src/ui/menu/GdUnitScriptEditorContextMenuHandler.gd")
+	_editor_context_menu = ScriptEditorContextMenuHandler.new()
+	_editor_code_context_menu = ScriptEditorContextMenuHandler.new()
 	add_context_menu_plugin(EditorContextMenuPlugin.CONTEXT_SLOT_FILESYSTEM, _filesystem_context_menu)
 	add_context_menu_plugin(EditorContextMenuPlugin.CONTEXT_SLOT_SCRIPT_EDITOR, _editor_context_menu)
 	add_context_menu_plugin(EditorContextMenuPlugin.CONTEXT_SLOT_SCRIPT_EDITOR_CODE, _editor_code_context_menu)

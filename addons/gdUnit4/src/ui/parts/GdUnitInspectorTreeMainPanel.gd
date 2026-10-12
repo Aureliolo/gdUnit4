@@ -1,22 +1,10 @@
+# gdlint: disable=max-public-methods,max-file-lines
 @tool
 extends Control
 
 ## Will be emitted when the test index counter is changed
 signal test_counters_changed(index: int, total: int, state: GdUnitInspectorTreeConstants.STATE)
 signal tree_item_selected(item: TreeItem)
-
-
-@onready var _tree: Tree = %Tree
-@onready var _report_panel: GdUnitReportPanel = %report
-@onready var _context_menu: GdUnitInspectorContextMenu = %contextMenu
-@onready var _discover_hint: Control = %discover_hint
-@onready var _spinner: Button = %spinner
-
-# loading tree icons
-var ICON_SPINNER: Texture2D
-var ICON_GD_SCRIPT: Texture2D
-var ICON_CS_SCRIPT: Texture2D
-var ICON_FOLDER: Texture2D
 
 
 enum GdUnitType {
@@ -39,11 +27,22 @@ const META_GDUNIT_EXECUTION_TIME := "gdUnit_execution_time"
 const META_GDUNIT_ORIGINAL_INDEX = "gdunit_original_index"
 const STATE = GdUnitInspectorTreeConstants.STATE
 
+# loading tree icons
+var ICON_SPINNER: Texture2D
+var ICON_GD_SCRIPT: Texture2D
+var ICON_CS_SCRIPT: Texture2D
+var ICON_FOLDER: Texture2D
 
 var _tree_root: TreeItem
 var _current_selected_item: TreeItem = null
 var _current_tree_view_mode := GdUnitSettings.get_inspector_tree_view_mode()
 var _run_test_recovery := true
+
+@onready var _tree: Tree = %Tree
+@onready var _report_panel: GdUnitReportPanel = %report
+@onready var _context_menu: GdUnitInspectorContextMenu = %contextMenu
+@onready var _discover_hint: Control = %discover_hint
+@onready var _spinner: Button = %spinner
 
 
 ## Used for debugging purposes only

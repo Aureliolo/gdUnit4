@@ -7,16 +7,16 @@ const GdMarkDownReader = preload("res://addons/gdUnit4/src/update/GdMarkDownRead
 const GdUnitUpdateClient = preload("res://addons/gdUnit4/src/update/GdUnitUpdateClient.gd")
 const GdUnitUpdateProgress = preload("res://addons/gdUnit4/src/update/GdUnitUpdate.gd")
 
+var _debug_mode := false
+var _patcher := GdUnitPatcher.new()
+var _current_version := GdUnit4Version.current()
+
 @onready var _md_reader: GdMarkDownReader = GdMarkDownReader.new()
 @onready var _update_client: GdUnitUpdateClient = $GdUnitUpdateClient
 @onready var _header: Label = $Panel/GridContainer/PanelContainer/header
 @onready var _update_button: Button = $Panel/GridContainer/Panel/HBoxContainer/update
 @onready var _content: RichTextLabel = $Panel/GridContainer/PanelContainer2/ScrollContainer/MarginContainer/content
 @onready var _update_progress :GdUnitUpdateProgress = %update_banner
-
-var _debug_mode := false
-var _patcher := GdUnitPatcher.new()
-var _current_version := GdUnit4Version.current()
 
 
 func _ready() -> void:
@@ -51,10 +51,9 @@ func request_releases() -> bool:
 		_update_progress.setup(_update_client, download_zip_url)
 		_update_button.set_disabled(false)
 		return true
-	else:
-		_header.text = "No update is available."
-		_update_button.set_disabled(true)
-		return false
+	_header.text = "No update is available."
+	_update_button.set_disabled(true)
+	return false
 
 
 func _colored(message_: String, color: Color) -> String:
@@ -194,7 +193,7 @@ func _on_content_meta_hover_started(meta: String) -> void:
 
 
 @warning_ignore("unused_parameter")
-func _on_content_meta_hover_ended(meta: String) -> void:
+func _on_content_meta_hover_ended(_meta: String) -> void:
 	_content.set_tooltip_text("")
 
 

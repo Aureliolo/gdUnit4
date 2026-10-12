@@ -1,9 +1,7 @@
+# gdlint: disable=max-public-methods
 # This class provides a runner for scense to simulate interactions like keyboard or mouse
 class_name GdUnitSceneRunnerImpl
 extends GdUnitSceneRunner
-
-
-var GdUnitFuncAssertImpl: GDScript = ResourceLoader.load("res://addons/gdUnit4/src/asserts/GdUnitFuncAssertImpl.gd", "GDScript", ResourceLoader.CACHE_MODE_REUSE)
 
 
 # mapping of mouse buttons and his masks
@@ -17,6 +15,8 @@ const MAP_MOUSE_BUTTON_MASKS := {
 	MOUSE_BUTTON_XBUTTON1 : MOUSE_BUTTON_MASK_MB_XBUTTON1,
 	MOUSE_BUTTON_XBUTTON2 : MOUSE_BUTTON_MASK_MB_XBUTTON2,
 }
+
+var GdUnitFuncAssertImpl: GDScript = ResourceLoader.load("res://addons/gdUnit4/src/asserts/GdUnitFuncAssertImpl.gd", "GDScript", ResourceLoader.CACHE_MODE_REUSE)
 
 var _is_disposed := false
 var _current_scene: Node = null
@@ -323,7 +323,13 @@ func simulate_screen_touch_drag_absolute(index: int, position: Vector2, time: fl
 
 
 @warning_ignore("return_value_discarded")
-func simulate_screen_touch_drag_drop(index: int, position: Vector2, drop_position: Vector2, time: float = 1.0, trans_type: Tween.TransitionType = Tween.TRANS_LINEAR) -> GdUnitSceneRunner:
+func simulate_screen_touch_drag_drop(
+	index: int,
+	position: Vector2,
+	drop_position: Vector2,
+	time: float = 1.0,
+	trans_type: Tween.TransitionType = Tween.TRANS_LINEAR
+) -> GdUnitSceneRunner:
 	simulate_screen_touch_press(index, position)
 	return await _do_touch_drag_at(index, drop_position, time, trans_type)
 

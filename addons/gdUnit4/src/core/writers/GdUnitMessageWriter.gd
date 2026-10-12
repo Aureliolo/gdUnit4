@@ -24,14 +24,6 @@ extends RefCounted
 ## [/codeblock]
 
 
-## Text style flag for bold formatting
-const BOLD = 0x1
-## Text style flag for italic formatting
-const ITALIC = 0x2
-## Text style flag for underline formatting
-const UNDERLINE = 0x4
-
-
 ## Represents special text effects that can be applied to the output
 enum Effect {
 	## No special effect applied
@@ -48,6 +40,14 @@ enum Align {
 	## Aligns text to the right of the cursor position, accounting for text length
 	RIGHT
 }
+
+
+## Text style flag for bold formatting
+const BOLD = 0x1
+## Text style flag for italic formatting
+const ITALIC = 0x2
+## Text style flag for underline formatting
+const UNDERLINE = 0x4
 
 
 ## The current text color to be used for the next output operation

@@ -39,12 +39,6 @@ extends Object
 
 
 
-static func instance() -> GdUnitTestDiscoverGuard:
-	return GdUnitSingleton.instance("GdUnitTestDiscoverGuard", func() -> GdUnitTestDiscoverGuard:
-		return GdUnitTestDiscoverGuard.new()
-	)
-
-
 ## Maps source files to their discovered test cases.[br]
 ## [br]
 ## Key: Test suite source file path[br]
@@ -66,6 +60,12 @@ var _discovered_changes := {}
 ## When true, maintains _discovered_changes for debugging.[br]
 ## Used primarily in tests to verify change detection.
 var _is_debug := false
+
+
+static func instance() -> GdUnitTestDiscoverGuard:
+	return GdUnitSingleton.instance("GdUnitTestDiscoverGuard", func() -> GdUnitTestDiscoverGuard:
+		return GdUnitTestDiscoverGuard.new()
+	)
 
 
 ## Creates a new guard instance.[br]

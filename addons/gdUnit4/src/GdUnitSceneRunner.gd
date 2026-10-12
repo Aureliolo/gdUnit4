@@ -208,7 +208,13 @@ extends RefCounted
 ##       # start drag at position 50,50 and drop it at 100,50
 ##       await runner.simulate_screen_touch_drag_drop(1, Vector2(50, 50), Vector2(100,50))
 ## [/codeblock]
-@abstract func simulate_screen_touch_drag_drop(index: int, position: Vector2, drop_position: Vector2, time: float = 1.0, trans_type: Tween.TransitionType = Tween.TRANS_LINEAR) -> GdUnitSceneRunner
+@abstract func simulate_screen_touch_drag_drop(
+	index: int,
+	position: Vector2,
+	drop_position: Vector2,
+	time: float = 1.0,
+	trans_type: Tween.TransitionType = Tween.TRANS_LINEAR
+) -> GdUnitSceneRunner
 
 
 ## Simulates a touch screen drag event to given position.[br]

@@ -2,10 +2,10 @@
 extends ProgressBar
 
 
+var _state: GdUnitInspectorTreeConstants.STATE
+
 @onready var progress_counter: Label = %progess_counter
 @onready var style: StyleBoxFlat = get("theme_override_styles/fill")
-
-var _state: GdUnitInspectorTreeConstants.STATE
 
 
 func _ready() -> void:

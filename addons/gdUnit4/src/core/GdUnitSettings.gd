@@ -3,6 +3,24 @@ class_name GdUnitSettings
 extends RefCounted
 
 
+enum GdScriptWarningMode {
+	IGNORE = 0,
+	WARN = 1,
+	ERROR = 2,
+}
+
+enum GdScriptWarningDirectoryMode {
+	EXCLUDE = 0,
+	INCLUDE = 1,
+}
+
+enum NAMING_CONVENTIONS {
+	AUTO_DETECT,
+	SNAKE_CASE,
+	PASCAL_CASE,
+}
+
+
 const GDUNIT_RUNNER = "GdUnitRunner"
 
 const MAIN_CATEGORY = "gdunit4"
@@ -47,18 +65,6 @@ const STDOUT_WITE_TO_FILE = CATEGORY_LOGGING + "log_path"
 const CATEGORY_GDSCRIPT_WARNINGS := "debug/gdscript/warnings/"
 const GDSCRIPT_WARNINGS_INFERRED_DECLARATION := CATEGORY_GDSCRIPT_WARNINGS + "inferred_declaration"
 const GDSCRIPT_WARNINGS_DIRECTORY_RULES := CATEGORY_GDSCRIPT_WARNINGS + "directory_rules"
-
-enum GdScriptWarningMode {
-	IGNORE = 0,
-	WARN = 1,
-	ERROR = 2,
-}
-
-enum GdScriptWarningDirectoryMode {
-	EXCLUDE = 0,
-	INCLUDE = 1,
-}
-
 
 # GdUnit Templates
 const TEMPLATES = MAIN_CATEGORY + "/templates"
@@ -113,12 +119,6 @@ const DEFAULT_TEST_LOOKUP_FOLDER :String = "test"
 # help texts
 const HELP_TEST_LOOKUP_FOLDER := "Subfolder where test suites are located (or empty to use source folder directly)"
 
-enum NAMING_CONVENTIONS {
-	AUTO_DETECT,
-	SNAKE_CASE,
-	PASCAL_CASE,
-}
-
 static var _property_help :Dictionary[String, String] = {}
 
 
@@ -157,18 +157,38 @@ static func setup() -> void:
 
 static func create_shortcut_properties_if_need() -> void:
 	# inspector
-	create_property_if_need(SHORTCUT_INSPECTOR_RERUN_TEST, GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RERUN_TESTS), "Rerun the most recently executed tests")
-	create_property_if_need(SHORTCUT_INSPECTOR_RERUN_TEST_DEBUG, GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RERUN_TESTS_DEBUG), "Rerun the most recently executed tests (Debug mode)")
-	create_property_if_need(SHORTCUT_INSPECTOR_RERUN_TEST_UNTIL_FAILURE, GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RERUN_TESTS_UNTIL_FAILURE), "Rerun tests until failure occurs")
-	create_property_if_need(SHORTCUT_INSPECTOR_RUN_TEST_OVERALL, GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RUN_TESTS_OVERALL), "Runs all tests (Debug mode)")
-	create_property_if_need(SHORTCUT_INSPECTOR_RUN_TEST_STOP, GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.STOP_TEST_RUN), "Stop the current test execution")
+	create_property_if_need(SHORTCUT_INSPECTOR_RERUN_TEST,
+		GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RERUN_TESTS),
+		"Rerun the most recently executed tests")
+	create_property_if_need(SHORTCUT_INSPECTOR_RERUN_TEST_DEBUG,
+		GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RERUN_TESTS_DEBUG),
+		"Rerun the most recently executed tests (Debug mode)")
+	create_property_if_need(SHORTCUT_INSPECTOR_RERUN_TEST_UNTIL_FAILURE,
+		GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RERUN_TESTS_UNTIL_FAILURE),
+		"Rerun tests until failure occurs")
+	create_property_if_need(SHORTCUT_INSPECTOR_RUN_TEST_OVERALL,
+		GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RUN_TESTS_OVERALL),
+		"Runs all tests (Debug mode)")
+	create_property_if_need(SHORTCUT_INSPECTOR_RUN_TEST_STOP,
+		GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.STOP_TEST_RUN),
+		"Stop the current test execution")
 	# script editor
-	create_property_if_need(SHORTCUT_EDITOR_RUN_TEST, GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RUN_TESTCASE), "Run the currently selected test")
-	create_property_if_need(SHORTCUT_EDITOR_RUN_TEST_DEBUG, GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RUN_TESTCASE_DEBUG), "Run the currently selected test (Debug mode).")
-	create_property_if_need(SHORTCUT_EDITOR_CREATE_TEST, GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.CREATE_TEST), "Create a new test case for the currently selected function")
+	create_property_if_need(SHORTCUT_EDITOR_RUN_TEST,
+		GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RUN_TESTCASE),
+		"Run the currently selected test")
+	create_property_if_need(SHORTCUT_EDITOR_RUN_TEST_DEBUG,
+		GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RUN_TESTCASE_DEBUG),
+		"Run the currently selected test (Debug mode).")
+	create_property_if_need(SHORTCUT_EDITOR_CREATE_TEST,
+		GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.CREATE_TEST),
+		"Create a new test case for the currently selected function")
 	# filesystem
-	create_property_if_need(SHORTCUT_FILESYSTEM_RUN_TEST, GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RUN_TESTSUITE), "Run all test suites in the selected folder or file")
-	create_property_if_need(SHORTCUT_FILESYSTEM_RUN_TEST_DEBUG, GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RUN_TESTSUITE_DEBUG), "Run all test suites in the selected folder or file (Debug)")
+	create_property_if_need(SHORTCUT_FILESYSTEM_RUN_TEST,
+		GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RUN_TESTSUITE),
+		"Run all test suites in the selected folder or file")
+	create_property_if_need(SHORTCUT_FILESYSTEM_RUN_TEST_DEBUG,
+		GdUnitShortcut.default_keys(GdUnitShortcut.ShortCut.RUN_TESTSUITE_DEBUG),
+		"Run all test suites in the selected folder or file (Debug)")
 
 
 static func create_property_if_need(

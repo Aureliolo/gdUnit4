@@ -2,6 +2,11 @@
 class_name GdObjects
 extends Resource
 
+enum COMPARE_MODE {
+	OBJECT_REFERENCE,
+	PARAMETER_DEEP_TEST
+}
+
 const GdUnitTools := preload("res://addons/gdUnit4/src/core/GdUnitTools.gd")
 
 
@@ -136,12 +141,6 @@ const NOTIFICATION_AS_STRING_MAPPINGS := {
 		Control.NOTIFICATION_SCROLL_BEGIN: "SCROLL_BEGIN",
 		Control.NOTIFICATION_SCROLL_END: "SCROLL_END",
 	}
-}
-
-
-enum COMPARE_MODE {
-	OBJECT_REFERENCE,
-	PARAMETER_DEEP_TEST
 }
 
 
@@ -287,9 +286,8 @@ static func _equals(obj_a: Variant, obj_b: Variant, case_sensitive: bool, compar
 		TYPE_STRING:
 			if case_sensitive:
 				return obj_a == obj_b
-			else:
-				@warning_ignore("unsafe_method_access")
-				return obj_a.to_lower() == obj_b.to_lower()
+			@warning_ignore("unsafe_method_access")
+			return obj_a.to_lower() == obj_b.to_lower()
 	return obj_a == obj_b
 
 
@@ -486,15 +484,13 @@ static func create_instance(clazz :Variant) -> GdUnitResult:
 				if not ClassDB.can_instantiate(clazz_name):
 					return  GdUnitResult.error("Can't instance Engine class '%s'." % clazz_name)
 				return GdUnitResult.success(ClassDB.instantiate(clazz_name))
-			else:
-				var clazz_path :String = extract_class_path(clazz_name)[0]
-				if not FileAccess.file_exists(clazz_path):
-					return GdUnitResult.error("Class '%s' not found." % clazz_name)
-				var script: GDScript = load(clazz_path)
-				if script != null:
-					return GdUnitResult.success(script.new())
-				else:
-					return GdUnitResult.error("Can't create instance for '%s'." % clazz_name)
+			var clazz_path :String = extract_class_path(clazz_name)[0]
+			if not FileAccess.file_exists(clazz_path):
+				return GdUnitResult.error("Class '%s' not found." % clazz_name)
+			var script: GDScript = load(clazz_path)
+			if script != null:
+				return GdUnitResult.success(script.new())
+			return GdUnitResult.error("Can't create instance for '%s'." % clazz_name)
 	return GdUnitResult.error("Can't create instance for class '%s'." % str(clazz))
 
 
