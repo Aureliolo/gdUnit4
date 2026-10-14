@@ -45,6 +45,7 @@ var _decoders := {
 	TYPE_OBJECT: _on_type_object
 }
 
+
 static func _regex(pattern: String) -> RegEx:
 	var regex := RegEx.new()
 	var err := regex.compile(pattern)
@@ -191,7 +192,7 @@ func _on_type_vector(value: Variant, type: int) -> String:
 				return "Vector4i()"
 			return "Vector4i%s" % value
 	return "unknown vector type %d" % type
-# gdlint: enable=max-returns
+	# gdlint: enable=max-returns
 
 
 func _on_type_transform2d(transform: Transform2D) -> String:

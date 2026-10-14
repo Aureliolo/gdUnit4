@@ -1,4 +1,5 @@
 # GdUnit generated TestSuite
+@warning_ignore("missing_tool")
 class_name GdUnitConsoleTestReporterTest
 extends GdUnitTestSuite
 
