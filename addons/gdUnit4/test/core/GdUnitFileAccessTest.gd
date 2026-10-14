@@ -1,7 +1,5 @@
 # GdUnit generated TestSuite
 extends GdUnitTestSuite
-@warning_ignore('unused_parameter')
-@warning_ignore('return_value_discarded')
 
 
 var file_to_save: String
@@ -47,8 +45,8 @@ func test_create_temp_dir() -> void:
 	file_to_save = temp_dir + "/save_game.dat"
 
 	var data := {
-		'user': "Hoschi",
-		'level': 42
+		"user": "Hoschi",
+		"level": 42
 	}
 	var file := FileAccess.open(file_to_save, FileAccess.WRITE)
 	file.store_line(JSON.stringify(data))
