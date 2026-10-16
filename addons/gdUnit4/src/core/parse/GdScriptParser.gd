@@ -23,7 +23,6 @@ var _token_function_static_declaration := RegExToken.new("static func", GdUnitTo
 var _token_function_declaration := RegExToken.new("func", GdUnitTools.to_regex("^func\\s+([\\w\\p{L}\\p{N}_]+)"), 1)
 var _token_function := Token.new(".")
 var _token_function_return_type := Token.new("->")
-var _token_function_end := Token.new("):")
 var _token_argument_asignment := Token.new("=")
 var _token_argument_type_asignment := Token.new(":=")
 var _token_argument_fuzzer := FuzzerToken.new(GdUnitTools.to_regex("((?!(fuzzer_(seed|iterations)))fuzzer?\\w+)( ?+= ?+| ?+:= ?+| ?+:Fuzzer ?+= ?+|)"))

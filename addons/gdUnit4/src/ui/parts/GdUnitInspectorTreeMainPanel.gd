@@ -26,7 +26,6 @@ const META_GDUNIT_ORIGINAL_INDEX = "gdunit_original_index"
 const STATE = GdUnitInspectorTreeConstants.STATE
 
 # loading tree icons
-var _icon_spinner: Texture2D
 var _icon_gd_script: Texture2D
 var _icon_cs_script: Texture2D
 var _icon_folder: Texture2D
