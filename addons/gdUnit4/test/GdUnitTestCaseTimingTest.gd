@@ -44,12 +44,12 @@ func after() -> void:
 
 
 func before_test() -> void:
-	var current: TestCaseStatistics = _test_values_current[__active_test_case]
+	var current: TestCaseStatistics = _test_values_current[GdUnitExecutionContext.current().test_case.test_name()]
 	current._test_before_calls += 1
 
 
 func after_test() -> void:
-	var current: TestCaseStatistics = _test_values_current[__active_test_case]
+	var current: TestCaseStatistics = _test_values_current[GdUnitExecutionContext.current().test_case.test_name()]
 	current._test_after_calls += 1
 
 
