@@ -20,7 +20,7 @@ extends RefCounted
 ## [codeblock]
 ## func startup(session: GdUnitTestSession) -> GdUnitResult:
 ##     # Access test cases
-##     print("Running %d test cases" % session.test_cases.size())
+##     print("Running %d test cases" % session.test_count())
 ##
 ##     # Send status messages
 ##     session.send_message("Custom hook initialized")
@@ -90,9 +90,9 @@ var report_path: String:
 	get:
 		return report_path
 ## [b][color=red]@readonly: Should not be modified directly during test execution![/color][/b][br]
-## Collection of test cases to be executed in this session.[br]
+## Collection of test cases to be executed in this session, by their GUID.[br]
 ## [br]
-## This array contains all the test cases that will be run during the session.
+## This dictionary contains all the test cases that will be run during the session.
 ## Test hooks can access this collection to:
 ## - Get the total number of tests to be executed
 ## - Access individual test case metadata
@@ -101,7 +101,7 @@ var report_path: String:
 ##
 ## The collection is typically populated before session startup and remains
 ## constant during test execution.
-var _test_cases: Array[GdUnitTestCase] = []
+var _test_cases_by_id: Dictionary[String, GdUnitTestCase] = {}
 
 
 ## Initializes the test session and sets up event forwarding.[br]
@@ -111,26 +111,25 @@ var _test_cases: Array[GdUnitTestCase] = []
 ## session-specific components to listen for test events without managing
 ## global signal connections.[/i]
 func _init(test_cases: Array[GdUnitTestCase], session_report_path: String) -> void:
-	# We build a copy to prevent a user is modifing the tests
-	_test_cases = test_cases.duplicate(true)
+	for test in test_cases:
+		_test_cases_by_id[test.guid._guid] = test
 	report_path = session_report_path
 	GdUnitSignals.instance().gdunit_event.connect(func(event: GdUnitEvent) -> void:
 		test_event.emit(event)
 	)
 
 
+## Returns the number of test cases to be executed in this session.
+func test_count() -> int:
+	return _test_cases_by_id.size()
+
+
 ## Finds a test case by its unique identifier.[br]
-## [br]
-## [i]Searches through all test cases to find a test with the matching GUID.[/i][br]
 ## [br]
 ## [param id] The GUID of the test to find[br]
 ## Returns the matching test case or null if not found.
 func find_test_by_id(id: GdUnitGUID) -> GdUnitTestCase:
-	for test in _test_cases:
-		if test.guid.equals(id):
-			return test
-
-	return null
+	return _test_cases_by_id.get(id._guid)
 
 
 ## Sends a message through the GdUnit messaging system.[br]

@@ -77,6 +77,18 @@ var message := error_as_string(ERR_FILE_NOT_FOUND)
 var message := error_string(ERR_FILE_NOT_FOUND)
 ```
 
+## Removed `_test_cases` on the Test Session
+
+The `_test_cases` array of the test session is removed, use `test_count()` instead.
+
+```gd
+# v6
+var test_count := session._test_cases.size()
+
+# v7
+var test_count := session.test_count()
+```
+
 ## Test Suite Template
 
 New test suites created from the default GDScript template no longer contain the `const __source` declaration.
