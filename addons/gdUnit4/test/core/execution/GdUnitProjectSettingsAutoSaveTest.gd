@@ -5,6 +5,7 @@ extends GdUnitTestSuite
 const IGNORE := GdUnitSettings.GdScriptWarningMode.IGNORE
 const ERROR := GdUnitSettings.GdScriptWarningMode.ERROR
 const MUTATION_SUITE := "res://addons/gdUnit4/test/core/resources/testsuites/TestSuiteProjectSettingsMutation.gd"
+const IN_PLACE_SUITE := "res://addons/gdUnit4/test/core/resources/testsuites/TestSuiteProjectSettingsInPlaceEdit.gd"
 const PROBE_KEY := "application/config/name"
 
 
@@ -73,5 +74,20 @@ func test_execution_stage_snapshot_is_gated_by_flag() -> void:
 
 	# clean up the mutation that leaked from the off run
 	ProjectSettings.set_setting(PROBE_KEY, original)
+
+
+func test_execution_stage_restores_in_place_edits_of_every_test() -> void:
+	var loaded := GdUnitTestResourceLoader.load_tests(IN_PLACE_SUITE)
+	var tests: Array[GdUnitTestCase] = Array(loaded.values(), TYPE_OBJECT, "RefCounted", GdUnitTestCase)
+	var original: Dictionary = (ProjectSettings.get_setting(GdUnitSettings.GDSCRIPT_WARNINGS_DIRECTORY_RULES) as Dictionary).duplicate()
+
+	await run_isolated(tests, true)
+	# the last test of the suite started from the setting as it was before the suite ran
+	assert_dict(Engine.get_meta("gdunit_in_place_probe_seen", {})).is_equal(original)
+	assert_dict(ProjectSettings.get_setting(GdUnitSettings.GDSCRIPT_WARNINGS_DIRECTORY_RULES)).is_equal(original)
+
+	Engine.remove_meta("gdunit_in_place_probe_seen")
+	# clean up, should an edit have leaked
+	ProjectSettings.set_setting(GdUnitSettings.GDSCRIPT_WARNINGS_DIRECTORY_RULES, original)
 
 #endregion
