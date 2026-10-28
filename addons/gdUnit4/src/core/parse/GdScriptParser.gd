@@ -482,12 +482,12 @@ func _parse_function_arguments(input: String) -> Array[Dictionary]:
 					_token_argument_type_asignment:
 						arg_value = _parse_end_function(input.substr(current_index), true)
 						current_index += arg_value.length()
-						current_argument["value"] = arg_value.lstrip(" ")
+						current_argument["value"] = arg_value.strip_edges()
 					_token_argument_asignment:
 						token = next_token(input, current_index)
 						arg_value = _parse_end_function(input.substr(current_index), true)
 						current_index += arg_value.length()
-						current_argument["value"] = arg_value.lstrip(" ")
+						current_argument["value"] = arg_value.strip_edges()
 
 					_token_bracket_square_open:
 						bracket += 1
