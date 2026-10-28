@@ -7,6 +7,7 @@ const WARN := GdUnitSettings.GdScriptWarningMode.WARN
 const ERROR := GdUnitSettings.GdScriptWarningMode.ERROR
 const EXCLUDE := GdUnitSettings.GdScriptWarningDirectoryMode.EXCLUDE
 const INCLUDE := GdUnitSettings.GdScriptWarningDirectoryMode.INCLUDE
+const NESTED_PROBE_KEY := "gdunit4/test/__snapshot_nested_probe__"
 
 
 #region save / restore
@@ -61,46 +62,33 @@ func test_restore_without_save_does_nothing() -> void:
 	assert_bool(true).is_true()
 
 
-func test_restore_returns_the_restored_values() -> void:
+func test_restore_keeps_the_saved_values() -> void:
 	# Setup
 	var snapshot := GdUnitProjectSettingsSnapshot.new()
 	ProjectSettings.set_setting(GdUnitSettings.GDSCRIPT_WARNINGS_INFERRED_DECLARATION, IGNORE)
 	snapshot.save()
+	ProjectSettings.set_setting(GdUnitSettings.GDSCRIPT_WARNINGS_INFERRED_DECLARATION, ERROR)
+	snapshot.restore()
 	# Act
 	ProjectSettings.set_setting(GdUnitSettings.GDSCRIPT_WARNINGS_INFERRED_DECLARATION, ERROR)
-	var restored := snapshot.restore()
-	# Verify
-	assert_int(restored[GdUnitSettings.GDSCRIPT_WARNINGS_INFERRED_DECLARATION]).is_equal(IGNORE)
-	assert_dict(snapshot.restore()).is_empty()
-
-
-func test_take_restores_the_taken_values() -> void:
-	# Setup
-	var first := GdUnitProjectSettingsSnapshot.new()
-	ProjectSettings.set_setting(GdUnitSettings.GDSCRIPT_WARNINGS_INFERRED_DECLARATION, IGNORE)
-	first.save()
-	var second := GdUnitProjectSettingsSnapshot.new()
-	second.take(first.restore())
-	# Act
-	ProjectSettings.set_setting(GdUnitSettings.GDSCRIPT_WARNINGS_INFERRED_DECLARATION, ERROR)
-	second.restore()
+	snapshot.restore()
 	# Verify
 	assert_int(ProjectSettings.get_setting(GdUnitSettings.GDSCRIPT_WARNINGS_INFERRED_DECLARATION))\
 		.is_equal(IGNORE)
 
 
-func test_restored_dictionary_is_a_copy() -> void:
+func test_restore_keeps_the_saved_values_of_a_setting_edited_in_place() -> void:
 	# Setup
 	var snapshot := GdUnitProjectSettingsSnapshot.new()
-	var original_rules: Dictionary = { "res://addons": EXCLUDE }
-	ProjectSettings.set_setting(GdUnitSettings.GDSCRIPT_WARNINGS_DIRECTORY_RULES, original_rules.duplicate())
+	ProjectSettings.set_setting(NESTED_PROBE_KEY, { "paths": ["res://addons"] })
 	snapshot.save()
-	ProjectSettings.set_setting(GdUnitSettings.GDSCRIPT_WARNINGS_DIRECTORY_RULES, { "res://modified": INCLUDE })
-	var restored := snapshot.restore()
 	# Act
-	var rules: Dictionary = ProjectSettings.get_setting(GdUnitSettings.GDSCRIPT_WARNINGS_DIRECTORY_RULES)
-	rules["res://edited"] = INCLUDE
+	((ProjectSettings.get_setting(NESTED_PROBE_KEY) as Dictionary)["paths"] as Array).append("res://first")
+	snapshot.restore()
+	((ProjectSettings.get_setting(NESTED_PROBE_KEY) as Dictionary)["paths"] as Array).append("res://second")
+	snapshot.restore()
 	# Verify
-	assert_dict(restored[GdUnitSettings.GDSCRIPT_WARNINGS_DIRECTORY_RULES]).is_equal(original_rules)
+	assert_dict(ProjectSettings.get_setting(NESTED_PROBE_KEY)).is_equal({ "paths": ["res://addons"] })
+	ProjectSettings.set_setting(NESTED_PROBE_KEY, null)
 
 #endregion

@@ -43,7 +43,7 @@ var _flaky_test_check := GdUnitSettings.is_test_flaky_check_enabled()
 var _flaky_test_retries := GdUnitSettings.get_flaky_max_retries()
 var _last_error: GdUnitError = null
 var _settings_snapshot: GdUnitProjectSettingsSnapshot = null
-var _restored_settings: Dictionary = {}
+var _test_case_settings_snapshot: GdUnitProjectSettingsSnapshot = null
 
 
 func _init(name: StringName, parent_context: GdUnitExecutionContext = null) -> void:
@@ -140,27 +140,22 @@ func save_project_settings() -> void:
 func restore_project_settings() -> void:
 	if _settings_snapshot == null:
 		return
-	@warning_ignore("return_value_discarded")
 	_settings_snapshot.restore()
 
 
-## Saves the settings a test case starts from, taking the values the previous test case of the
-## suite restored when it did, since [ProjectSettings] still holds them.
+## Saves the settings every test case of the suite starts from, the state [code]before()[/code] leaves behind.
 func save_test_case_settings() -> void:
-	if _settings_snapshot == null:
-		_settings_snapshot = GdUnitProjectSettingsSnapshot.new()
-	var restored := _parent_context._restored_settings
-	_parent_context._restored_settings = {}
-	if restored.is_empty():
-		_settings_snapshot.save()
-	else:
-		_settings_snapshot.take(restored)
+	if _test_case_settings_snapshot == null:
+		_test_case_settings_snapshot = GdUnitProjectSettingsSnapshot.new()
+	_test_case_settings_snapshot.save()
 
 
+## Restores the settings saved by [method save_test_case_settings] on the test suite context.
 func restore_test_case_settings() -> void:
-	if _settings_snapshot == null:
-		return
-	_parent_context._restored_settings = _settings_snapshot.restore()
+	if _parent_context != null:
+		_parent_context.restore_test_case_settings()
+	elif _test_case_settings_snapshot != null:
+		_test_case_settings_snapshot.restore()
 
 
 func error_monitor_start() -> void:

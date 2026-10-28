@@ -26,6 +26,8 @@ func _execute(context: GdUnitExecutionContext) -> void:
 		if GdUnitSettings.is_project_settings_auto_save():
 			context.save_project_settings()
 		await _stage_before.execute(context)
+		if GdUnitSettings.is_project_settings_auto_save():
+			context.save_test_case_settings()
 		for test_case_index in context.test_suite.get_child_count():
 			# iterate only over test cases
 			var test_case := context.test_suite.get_child(test_case_index) as GdUnitTestCaseImpl

@@ -1,9 +1,10 @@
 # Inner suite for GdUnitProjectSettingsAutoSaveTest.
-# The first two tests edit the same dictionary setting in place, without set_setting; each test
-# after the first starts from the values the one before it restored. The last test records what
-# the setting holds when it starts, where the suite's own snapshot has not yet undone a leak:
-#   restored values handed back to the setting as copies -> it holds neither edit
-#   the restored values themselves                       -> the second edit leaks into it
+# The first two tests edit the same dictionary setting in place, without set_setting; every test
+# starts from the settings the suite saved after before(), restored after the test before it. The
+# last test records what the setting holds when it starts, where the suite's own snapshot has not
+# yet undone a leak:
+#   saved values set back as copies -> it holds neither edit
+#   the saved values themselves     -> the second edit leaks into it
 extends GdUnitTestSuite
 
 const SEEN_META := "gdunit_in_place_probe_seen"

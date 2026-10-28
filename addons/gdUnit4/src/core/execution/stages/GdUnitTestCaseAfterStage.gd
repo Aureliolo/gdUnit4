@@ -23,3 +23,5 @@ func _execute(context: GdUnitExecutionContext) -> void:
 
 	await context.gc(GdUnitExecutionContext.GcOrphansCheck.TEST_HOOK_AFTER)
 	context.error_monitor_stop()
+	if GdUnitSettings.is_project_settings_auto_save():
+		context.restore_test_case_settings()

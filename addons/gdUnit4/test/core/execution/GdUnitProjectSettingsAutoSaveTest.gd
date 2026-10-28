@@ -6,6 +6,7 @@ const IGNORE := GdUnitSettings.GdScriptWarningMode.IGNORE
 const ERROR := GdUnitSettings.GdScriptWarningMode.ERROR
 const MUTATION_SUITE := "res://addons/gdUnit4/test/core/resources/testsuites/TestSuiteProjectSettingsMutation.gd"
 const IN_PLACE_SUITE := "res://addons/gdUnit4/test/core/resources/testsuites/TestSuiteProjectSettingsInPlaceEdit.gd"
+const RETRY_SUITE := "res://addons/gdUnit4/test/core/resources/testsuites/TestSuiteProjectSettingsRetry.gd"
 const PROBE_KEY := "application/config/name"
 
 
@@ -89,5 +90,24 @@ func test_execution_stage_restores_in_place_edits_of_every_test() -> void:
 	Engine.remove_meta("gdunit_in_place_probe_seen")
 	# clean up, should an edit have leaked
 	ProjectSettings.set_setting(GdUnitSettings.GDSCRIPT_WARNINGS_DIRECTORY_RULES, original)
+
+
+func test_execution_stage_restores_the_suite_settings_before_every_retry() -> void:
+	var loaded := GdUnitTestResourceLoader.load_tests(RETRY_SUITE)
+	var tests: Array[GdUnitTestCase] = Array(loaded.values(), TYPE_OBJECT, "RefCounted", GdUnitTestCase)
+	var original: Variant = ProjectSettings.get_setting(PROBE_KEY)
+	var flaky_check: Variant = ProjectSettings.get_setting(GdUnitSettings.TEST_FLAKY_CHECK, false)
+
+	ProjectSettings.set_setting(GdUnitSettings.TEST_FLAKY_CHECK, true)
+	await run_isolated(tests, true)
+	ProjectSettings.set_setting(GdUnitSettings.TEST_FLAKY_CHECK, flaky_check)
+	# each retry started from the settings before() left behind, not from the failed attempt's
+	assert_dict(Engine.get_meta("gdunit_retry_probe_seen", {}))\
+		.is_equal({ "single": "__before_probe__", "fuzzed": "__before_probe__" })
+	assert_str(str(ProjectSettings.get_setting(PROBE_KEY))).is_equal(str(original))
+
+	Engine.remove_meta("gdunit_retry_probe_seen")
+	# clean up, should a change have leaked
+	ProjectSettings.set_setting(PROBE_KEY, original)
 
 #endregion
