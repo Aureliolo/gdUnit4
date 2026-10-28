@@ -1,6 +1,8 @@
 # GdUnit generated TestSuite
 extends GdUnitTestSuite
 
+const _CONSTANT_SETS: Array = [["test_0", 0], ["test_1", 1]]
+
 var _x := 42
 var _obj: Node2D
 var _color := Color.RED
@@ -46,6 +48,10 @@ func _parameters_with_references_typed() -> Array[Array]:
 	]
 
 
+func _parameters_constant() -> Array:
+	return _CONSTANT_SETS
+
+
 func _parameters_string_arg(arg1: String, arg2: String) -> Array[Array]:
 	return [[arg1, arg2]]
 
@@ -83,6 +89,19 @@ func test_get_parameters_dynamic_created() -> void:
 	assert_array(resolver.get_parameters(self, 3)) \
 		.has_size(3) \
 		.contains_exactly("test_3", 3, [])
+
+
+func test_get_parameters_from_constant() -> void:
+	var resolver := GdCallableParameterSetResolver.new(self, "_parameters_constant()")
+
+	# The constant's sets are read-only, so the empty placeholder for `_test_parameters` goes on a copy
+	assert_int(resolver.get_max_index()).is_equal(2)
+	assert_array(resolver.get_parameters(self, 0)) \
+		.has_size(3) \
+		.contains_exactly("test_0", 0, [])
+	assert_array(resolver.get_parameters(self, 1)) \
+		.has_size(3) \
+		.contains_exactly("test_1", 1, [])
 
 
 func test_get_parameters_typed_static_created() -> void:

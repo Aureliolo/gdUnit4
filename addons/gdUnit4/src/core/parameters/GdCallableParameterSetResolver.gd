@@ -39,6 +39,7 @@ func _compile(instance: Node, expression: String) -> Array[Array]:
 	if parameter_set == null:
 		return []
 
+	parameter_set = parameter_set.duplicate(true)
 	for parameters: Array in parameter_set:
 		_finalize_parameter_set(parameters)
 
