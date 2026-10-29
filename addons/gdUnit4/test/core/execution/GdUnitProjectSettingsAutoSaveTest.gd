@@ -83,8 +83,12 @@ func test_execution_stage_restores_in_place_edits_of_every_test() -> void:
 	var original: Dictionary = (ProjectSettings.get_setting(GdUnitSettings.GDSCRIPT_WARNINGS_DIRECTORY_RULES) as Dictionary).duplicate()
 
 	await run_isolated(tests, true)
-	# the last test of the suite started from the setting as it was before the suite ran
-	assert_dict(Engine.get_meta("gdunit_in_place_probe_seen", {})).is_equal(original)
+	# every test of the suite started from the setting as it was before the suite ran
+	assert_dict(Engine.get_meta("gdunit_in_place_probe_seen", {})).is_equal({
+		"test_edits_setting_in_place_first": original,
+		"test_edits_setting_in_place_second": original,
+		"test_edits_setting_in_place_third": original,
+	})
 	assert_dict(ProjectSettings.get_setting(GdUnitSettings.GDSCRIPT_WARNINGS_DIRECTORY_RULES)).is_equal(original)
 
 	Engine.remove_meta("gdunit_in_place_probe_seen")
