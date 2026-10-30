@@ -90,13 +90,19 @@ func test_parse_function_arguments() -> void:
 		])
 
 	# signature split over lines, the closing bracket on a line of its own
-	assert_array(_parser._parse_function_arguments("func test_values(\nvalue: int, _test_parameters: Array = CASES\n) -> void:"))\
+	assert_array(_parser._parse_function_arguments("""
+		func test_values(
+			value: int, _test_parameters: Array = CASES
+		) -> void:""".dedent().trim_prefix("\n")))\
 		.has_size(2)\
 		.contains([
 			{ "name": "value", "type": TYPE_INT, "value": GdFunctionArgument.UNDEFINED },
 			{ "name": "_test_parameters", "type": TYPE_ARRAY, "value": "CASES" },
 		])
-	assert_array(_parser._parse_function_arguments("func test_values(\nvalue: int, _test_parameters := cases()\n) -> void:"))\
+	assert_array(_parser._parse_function_arguments("""
+		func test_values(
+			value: int, _test_parameters := cases()
+		) -> void:""".dedent().trim_prefix("\n")))\
 		.has_size(2)\
 		.contains([
 			{ "name": "value", "type": TYPE_INT, "value": GdFunctionArgument.UNDEFINED },
