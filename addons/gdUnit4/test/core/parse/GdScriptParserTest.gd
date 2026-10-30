@@ -115,6 +115,15 @@ func test_parse_function_arguments() -> void:
 			{ "name": "value", "type": TYPE_INT, "value": GdFunctionArgument.UNDEFINED },
 			{ "name": "_test_parameters", "type": TYPE_VARIANT, "value": "CASES" },
 		])
+	assert_array(_parser._parse_function_arguments("""
+		func test_values(
+			do_skip := true,
+			skip_reason := "reason"
+		) -> void:""".dedent().trim_prefix("\n")))\
+		.contains_exactly([
+			{ "name": "do_skip", "type": TYPE_VARIANT, "value": "true" },
+			{ "name": "skip_reason", "type": TYPE_VARIANT, "value": '"reason"' },
+		])
 
 
 func test_parse_arguments_with_super_constructor() -> void:
@@ -352,6 +361,15 @@ func test_parse_arguments_fuzzers() -> void:
 		) -> void:""".dedent().trim_prefix("\n")))\
 		.contains_exactly([
 			{ "name": "fuzzer", "type": TYPE_FUZZER, "value": "Fuzzers.rangei(0, 10)" },
+		])
+	assert_array(_parser._parse_function_arguments("""
+		func test_foo(
+			fuzzer := Fuzzers.rangei(0, 10),
+			fuzzer_iterations := 5,
+		) -> void:""".dedent().trim_prefix("\n")))\
+		.contains_exactly([
+			{ "name": "fuzzer", "type": TYPE_FUZZER, "value": "Fuzzers.rangei(0, 10)" },
+			{ "name": "fuzzer_iterations", "type": TYPE_VARIANT, "value": "5" },
 		])
 
 
