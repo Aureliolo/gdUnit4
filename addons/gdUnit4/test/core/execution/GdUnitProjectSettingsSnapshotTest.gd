@@ -62,7 +62,7 @@ func test_restore_without_save_does_nothing() -> void:
 	assert_bool(true).is_true()
 
 
-func test_restore_keeps_the_saved_values() -> void:
+func test_restore_can_be_repeated() -> void:
 	# Setup
 	var snapshot := GdUnitProjectSettingsSnapshot.new()
 	ProjectSettings.set_setting(GdUnitSettings.GDSCRIPT_WARNINGS_INFERRED_DECLARATION, IGNORE)

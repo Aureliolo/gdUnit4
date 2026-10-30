@@ -2,14 +2,32 @@ class_name GdUnitProjectSettingsSnapshot
 extends RefCounted
 ## Captures and restores all in-memory [ProjectSettings] values around a single
 ## stage of test execution.[br]
-## Suite-level and test-level isolation are achieved by two separate snapshots of the
-## test suite context rather than by stacking:[br]
+## A [GdUnitExecutionContext] holds at most one snapshot. With "Auto Save Project Settings" enabled the
+## stages take two snapshots per test suite, the state before [code]before()[/code] and the state
+## [code]before()[/code] leaves behind, which every test case context shares:[br]
 ## [codeblock]
-##   GdUnitTestSuiteExecutionStage  -> save()   (before before())
-##   GdUnitTestSuiteExecutionStage  -> save()   (after before(), the state every test case starts from)
-##     GdUnitTestCaseAfterStage     -> restore() (after after_test(), on every attempt)
-##   GdUnitTestSuiteExecutionStage  -> restore() (after after())
+##   suite context
+##   ├─ GdUnitTestSuiteBeforeStage
+##   │    ├─ snapshot_project_settings()    snapshot A: settings before before()
+##   │    └─ before()
+##   ├─ GdUnitTestSuiteExecutionStage
+##   │    └─ save()                         snapshot B: settings before() left behind
+##   ├─ test case context (one per test case, holds B)
+##   │    └─ attempt context (one per retry)
+##   │         ├─ before_test()
+##   │         ├─ test_<name>()
+##   │         └─ GdUnitTestCaseAfterStage
+##   │              ├─ after_test()
+##   │              └─ restore() B          every attempt starts from the same state
+##   └─ GdUnitTestSuiteAfterStage
+##        ├─ after()
+##        └─ restore() A                    the suite leaves no settings behind
 ## [/codeblock]
+## With the setting disabled no snapshot is taken by the stages. A test suite can still call
+## [method GdUnitTestSuite.snapshot_project_settings] and [method GdUnitTestSuite.restore_project_settings],
+## which save into and restore from the context currently running, e.g. the attempt context in
+## [code]before_test()[/code] and [code]after_test()[/code]. A snapshot saved in [code]before()[/code]
+## lands in the suite context and is restored by [code]GdUnitTestSuiteAfterStage[/code] after [code]after()[/code].
 
 var _snapshot: Dictionary = {}
 

@@ -11,6 +11,8 @@ func _execute(context: GdUnitExecutionContext) -> void:
 
 	@warning_ignore("redundant_await")
 	await test_suite.after()
+	context.restore_project_settings()
+
 	await context.gc(GdUnitExecutionContext.GcOrphansCheck.SUITE_HOOK_AFTER)
 
 	var reports := context.collect_reports(false)

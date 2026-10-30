@@ -9,7 +9,7 @@ func before() -> void:
 
 func test_collect_report_statistics_with_errors() -> void:
 	# setup execution context tree like is build by the executor run
-	var ctx_suite := GdUnitExecutionContext.new("")
+	var ctx_suite := GdUnitExecutionContext.new("", false)
 	var ts: GdUnitTestSuite = auto_free(GdUnitTestSuite.new())
 	var tc: GdUnitTestCaseImpl = auto_free(create_test_case("test_case1", 0, ""))
 	ts.add_child(tc)
@@ -80,7 +80,7 @@ func test_collect_report_statistics_with_errors() -> void:
 
 func test_collect_report_statistics_with_errors_on_suite_hooks() -> void:
 	# setup execution context tree like is build by the executor run
-	var ctx_suite := GdUnitExecutionContext.new("")
+	var ctx_suite := GdUnitExecutionContext.new("", false)
 	var ts: GdUnitTestSuite = auto_free(GdUnitTestSuite.new())
 	var tc: GdUnitTestCaseImpl = auto_free(create_test_case("test_case1", 0, ""))
 	ts.add_child(tc)
@@ -146,7 +146,7 @@ func test_collect_report_statistics_with_errors_on_suite_hooks() -> void:
 
 func test_collect_report_statistics_only_errors_on_test_hooks() -> void:
 	# setup execution context tree like is build by the executor run
-	var ctx_suite := GdUnitExecutionContext.new("")
+	var ctx_suite := GdUnitExecutionContext.new("", false)
 	var ts: GdUnitTestSuite = auto_free(GdUnitTestSuite.new())
 	var tc: GdUnitTestCaseImpl = auto_free(create_test_case("test_case1", 0, ""))
 	ts.add_child(tc)
@@ -210,7 +210,7 @@ func test_collect_report_statistics_only_errors_on_test_hooks() -> void:
 
 func test_collect_report_statistics_all_tests_skipped() -> void:
 	# setup execution context tree like is build by the executor run
-	var ctx_suite := GdUnitExecutionContext.new("")
+	var ctx_suite := GdUnitExecutionContext.new("", false)
 	var ts: GdUnitTestSuite = auto_free(GdUnitTestSuite.new())
 	var tc: GdUnitTestCaseImpl = auto_free(create_test_case("test_case1", 0, ""))
 	ts.add_child(tc)
@@ -276,7 +276,7 @@ func test_simmulate_flaky_test(retry_count: int, is_flaky: bool, is_failed: bool
 	[2, false, true],
 	[3, true, false],]) -> void:
 	# setup execution context tree like is build by the executor run
-	var ctx_suite := GdUnitExecutionContext.new("")
+	var ctx_suite := GdUnitExecutionContext.new("", false)
 	var ts: GdUnitTestSuite = auto_free(GdUnitTestSuite.new())
 	var tc: GdUnitTestCaseImpl = auto_free(create_test_case("test_case1", 0, ""))
 	ts.add_child(tc)
@@ -344,7 +344,7 @@ func test_simmulate_flaky_test(retry_count: int, is_flaky: bool, is_failed: bool
 
 
 func test_dispose_releases_error_monitor_logger() -> void:
-	var ctx_suite: GdUnitExecutionContext = GdUnitExecutionContext.new("")
+	var ctx_suite: GdUnitExecutionContext = GdUnitExecutionContext.new("", false)
 	var logger_ref: WeakRef = weakref(ctx_suite.error_monitor._logger)
 	assert_bool(logger_ref.get_ref() != null).is_true()
 
@@ -352,6 +352,91 @@ func test_dispose_releases_error_monitor_logger() -> void:
 	ctx_suite = null
 
 	assert_object(logger_ref.get_ref()).is_null()
+
+
+func test_project_settings_auto_save_is_passed_to_the_sub_contexts(auto_save: bool, _test_parameters := [[true], [false]]) -> void:
+	var probe_key := "gdunit4/test/__context_settings_probe__"
+	var ctx_suite := GdUnitExecutionContext.new("", auto_save)
+	var tc: GdUnitTestCaseImpl = auto_free(create_test_case("test_case1", 0, ""))
+	var ctx_test := GdUnitExecutionContext.of_test_case(ctx_suite, tc)
+	var ctx_attempt := GdUnitExecutionContext.of(ctx_test)
+	for ctx: GdUnitExecutionContext in [ctx_suite, ctx_test, ctx_attempt]:
+		ProjectSettings.set_setting(probe_key, "__saved__")
+		ctx.snapshot_project_settings()
+		ProjectSettings.set_setting(probe_key, "__changed__")
+		ctx.restore_project_settings()
+		assert_str(ProjectSettings.get_setting(probe_key)).is_equal("__saved__" if auto_save else "__changed__")
+
+	ctx_suite.dispose()
+	ProjectSettings.set_setting(probe_key, null)
+
+
+func test_test_case_context_keeps_its_settings_snapshot_on_a_manual_save() -> void:
+	var probe_key := "gdunit4/test/__context_settings_probe__"
+	var ctx_suite := GdUnitExecutionContext.new("", false)
+	var tc: GdUnitTestCaseImpl = auto_free(create_test_case("test_case1", 0, ""))
+	ProjectSettings.set_setting(probe_key, "__shared__")
+	var shared := GdUnitProjectSettingsSnapshot.new()
+	shared.save()
+	var ctx_test := GdUnitExecutionContext.of_test_case(ctx_suite, tc, shared)
+	var ctx_attempt := GdUnitExecutionContext.of(ctx_test)
+	var ctx_test_call := GdUnitExecutionContext.of(ctx_attempt)
+	assert_object(ctx_attempt.test_case_context()).is_same(ctx_test)
+	assert_object(ctx_test_call.test_case_context()).is_same(ctx_test)
+	assert_object(ctx_suite.test_case_context()).is_same(ctx_suite)
+
+	# a manual save in the attempt must not change the snapshot of the test case
+	ProjectSettings.set_setting(probe_key, "__manual__")
+	ctx_attempt.snapshot_project_settings(true)
+	ProjectSettings.set_setting(probe_key, "__changed__")
+	ctx_attempt.test_case_context().restore_project_settings()
+	assert_str(ProjectSettings.get_setting(probe_key)).is_equal("__shared__")
+
+	ctx_attempt.restore_project_settings()
+	assert_str(ProjectSettings.get_setting(probe_key)).is_equal("__manual__")
+
+	ctx_suite.dispose()
+	ProjectSettings.set_setting(probe_key, null)
+
+
+func test_snapshot_project_settings_needs_auto_save_or_force() -> void:
+	var probe_key := "gdunit4/test/__context_settings_probe__"
+	var ctx_suite := GdUnitExecutionContext.new("", false)
+	ProjectSettings.set_setting(probe_key, "__saved__")
+	ctx_suite.snapshot_project_settings()
+	ProjectSettings.set_setting(probe_key, "__changed__")
+	ctx_suite.restore_project_settings()
+	assert_str(ProjectSettings.get_setting(probe_key)).is_equal("__changed__")
+
+	ctx_suite.snapshot_project_settings(true)
+	ProjectSettings.set_setting(probe_key, "__changed_again__")
+	ctx_suite.restore_project_settings()
+	assert_str(ProjectSettings.get_setting(probe_key)).is_equal("__changed__")
+
+	ctx_suite.dispose()
+	ProjectSettings.set_setting(probe_key, null)
+
+
+func test_create_settings_snapshot_with_auto_save() -> void:
+	var probe_key := "gdunit4/test/__context_settings_probe__"
+	var ctx_suite := GdUnitExecutionContext.new("", true)
+	ProjectSettings.set_setting(probe_key, "__saved__")
+	var snapshot := ctx_suite.create_settings_snapshot()
+	assert_object(snapshot).is_not_null()
+
+	ProjectSettings.set_setting(probe_key, "__changed__")
+	snapshot.restore()
+	assert_str(ProjectSettings.get_setting(probe_key)).is_equal("__saved__")
+
+	ctx_suite.dispose()
+	ProjectSettings.set_setting(probe_key, null)
+
+
+func test_create_settings_snapshot_without_auto_save() -> void:
+	var ctx_suite := GdUnitExecutionContext.new("", false)
+	assert_object(ctx_suite.create_settings_snapshot()).is_null()
+
+	ctx_suite.dispose()
 
 
 static func create_test_case(p_name: String, p_line_number: int, p_script_path: String) -> GdUnitTestCaseImpl:

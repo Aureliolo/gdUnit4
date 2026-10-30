@@ -43,14 +43,15 @@ var _flaky_test_check := GdUnitSettings.is_test_flaky_check_enabled()
 var _flaky_test_retries := GdUnitSettings.get_flaky_max_retries()
 var _last_error: GdUnitError = null
 var _settings_snapshot: GdUnitProjectSettingsSnapshot = null
-var _test_case_settings_snapshot: GdUnitProjectSettingsSnapshot = null
+var _project_settings_auto_save := false
 
 
-func _init(name: StringName, parent_context: GdUnitExecutionContext = null) -> void:
+func _init(name: StringName, project_settings_auto_save_enabled: bool, parent_context: GdUnitExecutionContext = null) -> void:
 	_name = name
 	_parent_context = parent_context
 	_timer = LocalTime.now()
 	_orphan_monitor = GdUnitOrphanNodesMonitor.new(name)
+	_project_settings_auto_save = project_settings_auto_save_enabled
 
 	if parent_context != null:
 		parent_context._orphan_monitor.add_child_monitor(_orphan_monitor)
@@ -87,6 +88,13 @@ func last_sub_context() -> GdUnitExecutionContext:
 	return null if _sub_context.is_empty() else _sub_context[-1]
 
 
+## Returns the context created for the test case by [method of_test_case], or itself outside a test case.
+func test_case_context() -> GdUnitExecutionContext:
+	if _parent_context == null or _parent_context.test_case == null:
+		return self
+	return _parent_context.test_case_context()
+
+
 func terminate() -> void:
 	if test_case:
 		test_case.do_terminate()
@@ -97,21 +105,22 @@ static func current() -> GdUnitExecutionContext:
 
 
 static func of(pe: GdUnitExecutionContext) -> GdUnitExecutionContext:
-	var context := GdUnitExecutionContext.new(pe._test_case_name, pe)
+	var context := GdUnitExecutionContext.new(pe._test_case_name, pe._project_settings_auto_save, pe)
 	context._test_case_name = pe._test_case_name
 	context._test_execution_iteration = pe._test_execution_iteration
 	return context
 
 
-static func of_test_case(pe: GdUnitExecutionContext, p_test_case: GdUnitTestCaseImpl) -> GdUnitExecutionContext:
+static func of_test_case(pe: GdUnitExecutionContext, p_test_case: GdUnitTestCaseImpl, settings_snapshot: GdUnitProjectSettingsSnapshot = null) -> GdUnitExecutionContext:
 	assert(p_test_case, "test_case is null")
-	var context := GdUnitExecutionContext.new(p_test_case.test_name(), pe)
+	var context := GdUnitExecutionContext.new(p_test_case.test_name(), pe._project_settings_auto_save, pe)
 	context.test_case = p_test_case
+	context._settings_snapshot = settings_snapshot
 	return context
 
 
 static func of_parameterized_test(pe: GdUnitExecutionContext, test_case_name: String, test_case_parameter_set: Array) -> GdUnitExecutionContext:
-	var context := GdUnitExecutionContext.new(test_case_name, pe)
+	var context := GdUnitExecutionContext.new(test_case_name, pe._project_settings_auto_save, pe)
 	context._test_case_name = test_case_name
 	context._test_case_parameter_set = test_case_parameter_set
 	return context
@@ -131,31 +140,23 @@ func get_test_case_name() -> StringName:
 	return _test_case_name
 
 
-func save_project_settings() -> void:
-	if _settings_snapshot == null:
+func snapshot_project_settings(force := false) -> void:
+	if _project_settings_auto_save or force:
 		_settings_snapshot = GdUnitProjectSettingsSnapshot.new()
-	_settings_snapshot.save()
+		_settings_snapshot.save()
 
 
 func restore_project_settings() -> void:
-	if _settings_snapshot == null:
-		return
-	_settings_snapshot.restore()
+	if _settings_snapshot != null:
+		_settings_snapshot.restore()
 
 
-## Saves the settings every test case of the suite starts from, the state [code]before()[/code] leaves behind.
-func save_test_case_settings() -> void:
-	if _test_case_settings_snapshot == null:
-		_test_case_settings_snapshot = GdUnitProjectSettingsSnapshot.new()
-	_test_case_settings_snapshot.save()
-
-
-## Restores the settings saved by [method save_test_case_settings] on the test suite context.
-func restore_test_case_settings() -> void:
-	if _parent_context != null:
-		_parent_context.restore_test_case_settings()
-	elif _test_case_settings_snapshot != null:
-		_test_case_settings_snapshot.restore()
+func create_settings_snapshot() -> GdUnitProjectSettingsSnapshot:
+	if not _project_settings_auto_save:
+		return null
+	var snapshot := GdUnitProjectSettingsSnapshot.new()
+	snapshot.save()
+	return snapshot
 
 
 func error_monitor_start() -> void:
