@@ -139,8 +139,9 @@ func print_obj_usage(name :String) :
 Helpers to snapshot and restore the in-memory [`ProjectSettings`](https://docs.godotengine.org/en/stable/classes/class_projectsettings.html)
 around a test that changes them, so the change does not leak into later tests.
 
-By default GdUnit automatically saves and restores your project settings around every test execution
-(the **Auto Save Project Settings** setting). If you turn that off — for example to save time in a suite
+By default GdUnit automatically saves your project settings before each test suite and restores them after it, and sets them
+back to the state `before()` left behind after every test case and every retry attempt (the **Auto Save Project Settings** setting).
+If you turn that off — for example to save time in a suite
 where almost no test touches the settings — you can snapshot on demand in just the tests that need it:
 call **snapshot_project_settings()** in `before()`/`before_test()` and **restore_project_settings()** in
 `after()`/`after_test()`. While **Auto Save Project Settings** is enabled, both helpers have no effect and push an error, because the
