@@ -13,7 +13,7 @@ extends RefCounted
 ##   ├─ GdUnitTestSuiteExecutionStage
 ##   │    └─ save()                         snapshot B: settings before() left behind
 ##   ├─ test case context (one per test case, holds B)
-##   │    └─ attempt context (one per retry)
+##   │    └─ attempt context (one per retry, inherits B)
 ##   │         ├─ before_test()
 ##   │         ├─ test_<name>()
 ##   │         └─ GdUnitTestCaseAfterStage
@@ -25,9 +25,10 @@ extends RefCounted
 ## [/codeblock]
 ## With the setting disabled no snapshot is taken by the stages. A test suite can still call
 ## [method GdUnitTestSuite.snapshot_project_settings] and [method GdUnitTestSuite.restore_project_settings],
-## which save into and restore from the context currently running, e.g. the attempt context in
-## [code]before_test()[/code] and [code]after_test()[/code]. A snapshot saved in [code]before()[/code]
-## lands in the suite context and is restored by [code]GdUnitTestSuiteAfterStage[/code] after [code]after()[/code].
+## which save into and restore from the context currently running. A snapshot saved in
+## [code]before_test()[/code] lands in the attempt context and is restored by [code]GdUnitTestCaseAfterStage[/code]
+## after [code]after_test()[/code], a snapshot saved in [code]before()[/code] lands in the suite context and is
+## restored by [code]GdUnitTestSuiteAfterStage[/code] after [code]after()[/code].
 
 var _snapshot: Dictionary = {}
 

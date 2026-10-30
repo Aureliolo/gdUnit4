@@ -88,13 +88,6 @@ func last_sub_context() -> GdUnitExecutionContext:
 	return null if _sub_context.is_empty() else _sub_context[-1]
 
 
-## Returns the context created for the test case by [method of_test_case], or itself outside a test case.
-func test_case_context() -> GdUnitExecutionContext:
-	if _parent_context == null or _parent_context.test_case == null:
-		return self
-	return _parent_context.test_case_context()
-
-
 func terminate() -> void:
 	if test_case:
 		test_case.do_terminate()
@@ -108,6 +101,7 @@ static func of(pe: GdUnitExecutionContext) -> GdUnitExecutionContext:
 	var context := GdUnitExecutionContext.new(pe._test_case_name, pe._project_settings_auto_save, pe)
 	context._test_case_name = pe._test_case_name
 	context._test_execution_iteration = pe._test_execution_iteration
+	context._settings_snapshot = pe._settings_snapshot
 	return context
 
 

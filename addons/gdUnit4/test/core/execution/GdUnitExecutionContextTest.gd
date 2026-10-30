@@ -371,7 +371,7 @@ func test_project_settings_auto_save_is_passed_to_the_sub_contexts(auto_save: bo
 	ProjectSettings.set_setting(probe_key, null)
 
 
-func test_test_case_context_keeps_its_settings_snapshot_on_a_manual_save() -> void:
+func test_sub_contexts_inherit_the_settings_snapshot_of_the_test_case() -> void:
 	var probe_key := "gdunit4/test/__context_settings_probe__"
 	var ctx_suite := GdUnitExecutionContext.new("", false)
 	var tc: GdUnitTestCaseImpl = auto_free(create_test_case("test_case1", 0, ""))
@@ -381,19 +381,34 @@ func test_test_case_context_keeps_its_settings_snapshot_on_a_manual_save() -> vo
 	var ctx_test := GdUnitExecutionContext.of_test_case(ctx_suite, tc, shared)
 	var ctx_attempt := GdUnitExecutionContext.of(ctx_test)
 	var ctx_test_call := GdUnitExecutionContext.of(ctx_attempt)
-	assert_object(ctx_attempt.test_case_context()).is_same(ctx_test)
-	assert_object(ctx_test_call.test_case_context()).is_same(ctx_test)
-	assert_object(ctx_suite.test_case_context()).is_same(ctx_suite)
 
-	# a manual save in the attempt must not change the snapshot of the test case
+	for ctx: GdUnitExecutionContext in [ctx_attempt, ctx_test_call]:
+		ProjectSettings.set_setting(probe_key, "__changed__")
+		ctx.restore_project_settings()
+		assert_str(ProjectSettings.get_setting(probe_key)).is_equal("__shared__")
+
+	ctx_suite.dispose()
+	ProjectSettings.set_setting(probe_key, null)
+
+
+func test_manual_snapshot_in_the_attempt_keeps_the_settings_snapshot_of_the_test_case() -> void:
+	var probe_key := "gdunit4/test/__context_settings_probe__"
+	var ctx_suite := GdUnitExecutionContext.new("", false)
+	var tc: GdUnitTestCaseImpl = auto_free(create_test_case("test_case1", 0, ""))
+	ProjectSettings.set_setting(probe_key, "__shared__")
+	var shared := GdUnitProjectSettingsSnapshot.new()
+	shared.save()
+	var ctx_test := GdUnitExecutionContext.of_test_case(ctx_suite, tc, shared)
+	var ctx_attempt := GdUnitExecutionContext.of(ctx_test)
+
 	ProjectSettings.set_setting(probe_key, "__manual__")
 	ctx_attempt.snapshot_project_settings(true)
 	ProjectSettings.set_setting(probe_key, "__changed__")
-	ctx_attempt.test_case_context().restore_project_settings()
-	assert_str(ProjectSettings.get_setting(probe_key)).is_equal("__shared__")
-
 	ctx_attempt.restore_project_settings()
 	assert_str(ProjectSettings.get_setting(probe_key)).is_equal("__manual__")
+
+	GdUnitExecutionContext.of(ctx_test).restore_project_settings()
+	assert_str(ProjectSettings.get_setting(probe_key)).is_equal("__shared__")
 
 	ctx_suite.dispose()
 	ProjectSettings.set_setting(probe_key, null)
