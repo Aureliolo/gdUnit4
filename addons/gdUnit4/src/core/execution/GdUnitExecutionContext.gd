@@ -36,7 +36,6 @@ var _memory_observer: GdUnitMemoryObserver
 var _report_collector: GdUnitTestReportCollector
 var _timer: LocalTime
 var _test_case_name: StringName
-var _test_case_parameter_set: Array
 var _name: String
 var _test_execution_iteration: int = 0
 var _flaky_test_check := GdUnitSettings.is_test_flaky_check_enabled()
@@ -111,13 +110,6 @@ static func of_test_case(pe: GdUnitExecutionContext, p_test_case: GdUnitTestCase
 	var context := GdUnitExecutionContext.new(p_test_case.test_name(), pe)
 	context.test_case = p_test_case
 	context._settings_snapshot = settings_snapshot
-	return context
-
-
-static func of_parameterized_test(pe: GdUnitExecutionContext, test_case_name: String, test_case_parameter_set: Array) -> GdUnitExecutionContext:
-	var context := GdUnitExecutionContext.new(test_case_name, pe)
-	context._test_case_name = test_case_name
-	context._test_case_parameter_set = test_case_parameter_set
 	return context
 
 
