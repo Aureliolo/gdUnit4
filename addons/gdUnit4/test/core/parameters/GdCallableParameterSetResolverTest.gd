@@ -52,6 +52,12 @@ func _parameters_constant() -> Array:
 	return _CONSTANT_SETS
 
 
+func _parameters_typed_sets() -> Array:
+	var set_0: Array[int] = [0, 1]
+	var set_1: Array[int] = [1, 2]
+	return [set_0, set_1]
+
+
 func _parameters_string_arg(arg1: String, arg2: String) -> Array[Array]:
 	return [[arg1, arg2]]
 
@@ -102,6 +108,19 @@ func test_get_parameters_from_constant() -> void:
 	assert_array(resolver.get_parameters(self, 1)) \
 		.has_size(3) \
 		.contains_exactly("test_1", 1, [])
+	assert_array(_CONSTANT_SETS).is_equal([["test_0", 0], ["test_1", 1]])
+
+
+func test_get_parameters_from_typed_sets() -> void:
+	var resolver := GdCallableParameterSetResolver.new(self, "_parameters_typed_sets()")
+
+	assert_int(resolver.get_max_index()).is_equal(2)
+	assert_array(resolver.get_parameters(self, 0)) \
+		.has_size(3) \
+		.contains_exactly(0, 1, [])
+	assert_array(resolver.get_parameters(self, 1)) \
+		.has_size(3) \
+		.contains_exactly(1, 2, [])
 
 
 func test_get_parameters_typed_static_created() -> void:
