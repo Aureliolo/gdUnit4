@@ -100,7 +100,6 @@ func test_get_parameters_dynamic_created() -> void:
 func test_get_parameters_from_constant() -> void:
 	var resolver := GdCallableParameterSetResolver.new(self, "_parameters_constant()")
 
-	# The constant's sets are read-only, so the empty placeholder for `_test_parameters` goes on a copy
 	assert_int(resolver.get_max_index()).is_equal(2)
 	assert_array(resolver.get_parameters(self, 0)) \
 		.has_size(3) \
