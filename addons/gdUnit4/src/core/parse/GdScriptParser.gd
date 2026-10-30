@@ -484,7 +484,6 @@ func _parse_function_arguments(input: String) -> Array[Dictionary]:
 						current_index += arg_value.length()
 						current_argument["value"] = arg_value.strip_edges()
 					_token_argument_asignment:
-						token = next_token(input, current_index)
 						arg_value = _parse_end_function(input.substr(current_index), true)
 						current_index += arg_value.length()
 						current_argument["value"] = arg_value.strip_edges()
