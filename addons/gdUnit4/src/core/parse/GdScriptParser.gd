@@ -462,7 +462,7 @@ func _parse_function_arguments(input: String) -> Array[Dictionary]:
 						arg_value = _parse_end_function(input.substr(current_index), true)
 						current_index += arg_value.length()
 						current_argument["name"] = (token as FuzzerToken).name()
-						current_argument["value"] = arg_value.lstrip(" ")
+						current_argument["value"] = arg_value.strip_edges()
 						current_argument["type"] = TYPE_FUZZER
 						arguments.append(current_argument)
 						continue
