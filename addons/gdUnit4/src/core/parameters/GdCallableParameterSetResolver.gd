@@ -42,7 +42,7 @@ func _compile(instance: Node, expression: String) -> Array[Array]:
 	var result: Array[Array] = []
 	result.resize(parameter_set.size())
 	for index in parameter_set.size():
-		result[index] = _finalize_parameter_set(parameter_set[index])
+		result[index] = _finalize_parameter_set(parameter_set[index].duplicate())
 	return result
 
 

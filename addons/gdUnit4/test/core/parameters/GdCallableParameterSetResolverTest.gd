@@ -210,6 +210,7 @@ func test_get_parameters_dynamic_referenced() -> void:
 
 	# We used the function `_parameters_with_references_typed()` that builds a parameter set with size 9
 	assert_int(resolver.get_max_index()).is_equal(9)
+	assert_array(_test_set_a).is_equal(["test_8", Color(1, 1, 1), Color(.1, .1, .1)])
 
 
 func test_get_parameters_string_values() -> void:
