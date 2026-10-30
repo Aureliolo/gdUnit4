@@ -46,7 +46,7 @@ var _settings_snapshot: GdUnitProjectSettingsSnapshot = null
 var _project_settings_auto_save := false
 
 
-func _init(name: StringName, project_settings_auto_save_enabled: bool, parent_context: GdUnitExecutionContext = null) -> void:
+func _init(name: StringName, parent_context: GdUnitExecutionContext = null, project_settings_auto_save_enabled := false) -> void:
 	_name = name
 	_parent_context = parent_context
 	_timer = LocalTime.now()
@@ -54,6 +54,8 @@ func _init(name: StringName, project_settings_auto_save_enabled: bool, parent_co
 	_project_settings_auto_save = project_settings_auto_save_enabled
 
 	if parent_context != null:
+		_project_settings_auto_save = parent_context._project_settings_auto_save
+		_settings_snapshot = parent_context._settings_snapshot
 		parent_context._orphan_monitor.add_child_monitor(_orphan_monitor)
 		orphan_monitor_start()
 
@@ -98,23 +100,22 @@ static func current() -> GdUnitExecutionContext:
 
 
 static func of(pe: GdUnitExecutionContext) -> GdUnitExecutionContext:
-	var context := GdUnitExecutionContext.new(pe._test_case_name, pe._project_settings_auto_save, pe)
+	var context := GdUnitExecutionContext.new(pe._test_case_name, pe)
 	context._test_case_name = pe._test_case_name
 	context._test_execution_iteration = pe._test_execution_iteration
-	context._settings_snapshot = pe._settings_snapshot
 	return context
 
 
 static func of_test_case(pe: GdUnitExecutionContext, p_test_case: GdUnitTestCaseImpl, settings_snapshot: GdUnitProjectSettingsSnapshot = null) -> GdUnitExecutionContext:
 	assert(p_test_case, "test_case is null")
-	var context := GdUnitExecutionContext.new(p_test_case.test_name(), pe._project_settings_auto_save, pe)
+	var context := GdUnitExecutionContext.new(p_test_case.test_name(), pe)
 	context.test_case = p_test_case
 	context._settings_snapshot = settings_snapshot
 	return context
 
 
 static func of_parameterized_test(pe: GdUnitExecutionContext, test_case_name: String, test_case_parameter_set: Array) -> GdUnitExecutionContext:
-	var context := GdUnitExecutionContext.new(test_case_name, pe._project_settings_auto_save, pe)
+	var context := GdUnitExecutionContext.new(test_case_name, pe)
 	context._test_case_name = test_case_name
 	context._test_case_parameter_set = test_case_parameter_set
 	return context
